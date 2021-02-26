@@ -1,11 +1,16 @@
 import { useState } from "react";
+import MovieItem from "../components/MovieItem";
 
 export default function DiscoverMoviesPage() {
   const [searchText, set_searchText] = useState("");
-  const [movies, set_movies] = useState([]);
+  const [state, setState] = useState({ status: "idle" });
 
   const search = async () => {
-    console.log("Start searching for:", searchText);
+    if (searchText === "") {
+      setState({ status: "idle" });
+      return;
+    }
+    setState({ status: "searching" });
 
     const queryParam = encodeURIComponent(searchText);
 
@@ -13,12 +18,8 @@ export default function DiscoverMoviesPage() {
       `https://omdbapi.com/?apikey=f017e376&s=${queryParam}`
     ).then((r) => r.json());
 
-    console.log(data.Search);
-
-    set_movies(data.Search);
+    setState({ status: "done", data: data.Search });
   };
-
-  console.log("this is movie", movies);
 
   return (
     <div>
@@ -30,16 +31,26 @@ export default function DiscoverMoviesPage() {
         />
         <button onClick={search}>Search</button>
       </p>
-      <div>
-        {movies.map((movie) => {
-          return (
-            <div style={{ backgroundColor: "green" }}>
-              <h3>{movie.Title}</h3>
-              <p>{movie.Year}</p>
-            </div>
-          );
-        })}
-      </div>
+      {state.status === "idle" && (
+        <p>Type in a search term and click "Search" to start...</p>
+      )}
+      {state.status === "searching" && <p>Searching...</p>}
+      {state.status === "done" && (
+        <div>
+          <h2>Search results</h2>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              margin: "0 -10px",
+            }}
+          >
+            {state.data.map((movie) => (
+              <MovieItem key={movie.imdbID} movie={movie} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
