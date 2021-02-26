@@ -1,7 +1,7 @@
 import React from "react";
 
 const AboutPage = () => {
-  return <div>About</div>;
+  return <div>Created by Giampiero de Vita</div>;
 };
 
 export default AboutPage;
